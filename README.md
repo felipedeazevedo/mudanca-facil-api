@@ -4,7 +4,7 @@ JDK 21
 Maven 3.9.4
 Docker Desktop
 
-Para rodar:
+Para baixar as dependências do projeto, execute
 
 mvn clean install
 
