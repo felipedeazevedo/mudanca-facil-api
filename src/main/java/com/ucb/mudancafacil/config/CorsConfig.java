@@ -14,10 +14,9 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("*") // OK com allowCredentials(false)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(false); // necessário
+                        .allowedOrigins("http://localhost:5173") // 👈 frontend
+                        .allowedMethods("*")
+                        .allowCredentials(true); // 👈 necessário para cookies/autenticação
             }
         };
     }
