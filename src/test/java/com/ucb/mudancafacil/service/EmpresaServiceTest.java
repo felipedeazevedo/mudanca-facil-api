@@ -147,4 +147,120 @@ class EmpresaServiceTest {
 
         assertFalse(resultado);
     }
+
+    @Test
+    void deveAtualizarApenasCamposAlterados() {
+        Empresa existente = criarEmpresa();
+        when(empresaRepository.findById(1L)).thenReturn(Optional.of(existente));
+        when(empresaRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        EmpresaDTO dtoAtualizado = criarEmpresaDTO();
+        dtoAtualizado.setNome(null);
+        dtoAtualizado.setRaAtuacao("SP");
+
+        Optional<EmpresaDTO> atualizado = empresaService.atualizar(1L, dtoAtualizado);
+
+        assertTrue(atualizado.isPresent());
+        assertEquals(null, atualizado.get().getNome());
+        assertEquals("SP", atualizado.get().getRaAtuacao());
+    }
+
+    @Test
+    void deveSalvarEmpresaComCamposNulos() {
+        EmpresaDTO dto = new EmpresaDTO();
+        dto.setNome(null);
+        dto.setEmail(null);
+        dto.setSenha(null);
+        dto.setHorarioInicioDisponibilidade(null);
+        dto.setHorarioFimDisponibilidade(null);
+        dto.setRaAtuacao(null);
+        dto.setMediaPrecoMudancaPequena(null);
+        dto.setMediaPrecoMudancaMedia(null);
+        dto.setMediaPrecoMudancaGrande(null);
+
+        Empresa empresaSalva = new Empresa();
+        empresaSalva.setId(2L);
+
+        when(empresaRepository.save(any())).thenReturn(empresaSalva);
+
+        EmpresaDTO salvo = empresaService.salvar(dto);
+
+        assertEquals(2L, salvo.getId());
+        assertEquals(null, salvo.getNome());
+    }
+
+    @Test
+    void deveRetornarListaVaziaQuandoNaoExistirEmpresas() {
+        when(empresaRepository.findAll()).thenReturn(List.of());
+
+        List<EmpresaDTO> empresas = empresaService.listar();
+
+        assertTrue(empresas.isEmpty());
+    }
+
+    @Test
+    void deveBuscarEmpresaPorIdComCamposNulos() {
+        Empresa empresa = new Empresa();
+        empresa.setId(10L);
+        when(empresaRepository.findById(10L)).thenReturn(Optional.of(empresa));
+
+        Optional<EmpresaDTO> dto = empresaService.buscarPorId(10L);
+
+        assertTrue(dto.isPresent());
+        assertEquals(10L, dto.get().getId());
+        assertEquals(null, dto.get().getNome());
+    }
+
+    @Test
+    void deveAtualizarTodosOsCampos() {
+        Empresa existente = criarEmpresa();
+        when(empresaRepository.findById(1L)).thenReturn(Optional.of(existente));
+        when(empresaRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        EmpresaDTO dtoAtualizado = new EmpresaDTO();
+        dtoAtualizado.setNome("Empresa X");
+        dtoAtualizado.setEmail("x@x.com");
+        dtoAtualizado.setSenha("novaSenha");
+        dtoAtualizado.setHorarioInicioDisponibilidade(LocalTime.of(9, 0));
+        dtoAtualizado.setHorarioFimDisponibilidade(LocalTime.of(17, 0));
+        dtoAtualizado.setRaAtuacao("RJ");
+        dtoAtualizado.setMediaPrecoMudancaPequena(111.0);
+        dtoAtualizado.setMediaPrecoMudancaMedia(222.0);
+        dtoAtualizado.setMediaPrecoMudancaGrande(333.0);
+
+        Optional<EmpresaDTO> atualizado = empresaService.atualizar(1L, dtoAtualizado);
+
+        assertTrue(atualizado.isPresent());
+        EmpresaDTO dto = atualizado.get();
+        assertEquals("Empresa X", dto.getNome());
+        assertEquals("x@x.com", dto.getEmail());
+        assertEquals("novaSenha", dto.getSenha());
+        assertEquals(LocalTime.of(9, 0), dto.getHorarioInicioDisponibilidade());
+        assertEquals(LocalTime.of(17, 0), dto.getHorarioFimDisponibilidade());
+        assertEquals("RJ", dto.getRaAtuacao());
+        assertEquals(111.0, dto.getMediaPrecoMudancaPequena());
+        assertEquals(222.0, dto.getMediaPrecoMudancaMedia());
+        assertEquals(333.0, dto.getMediaPrecoMudancaGrande());
+    }
+
+    @Test
+    void deveSalvarEmpresaComValoresLimite() {
+        EmpresaDTO dto = criarEmpresaDTO();
+        dto.setMediaPrecoMudancaPequena(0.0);
+        dto.setMediaPrecoMudancaMedia(Double.MAX_VALUE);
+        dto.setMediaPrecoMudancaGrande(Double.MIN_VALUE);
+
+        Empresa empresaSalva = criarEmpresa();
+        empresaSalva.setMediaPrecoMudancaPequena(0.0);
+        empresaSalva.setMediaPrecoMudancaMedia(Double.MAX_VALUE);
+        empresaSalva.setMediaPrecoMudancaGrande(Double.MIN_VALUE);
+
+        when(empresaRepository.save(any())).thenReturn(empresaSalva);
+
+        EmpresaDTO salvo = empresaService.salvar(dto);
+
+        assertEquals(0.0, salvo.getMediaPrecoMudancaPequena());
+        assertEquals(Double.MAX_VALUE, salvo.getMediaPrecoMudancaMedia());
+        assertEquals(Double.MIN_VALUE, salvo.getMediaPrecoMudancaGrande());
+    }
 }

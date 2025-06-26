@@ -118,6 +118,18 @@ class MudancaServiceTest {
     }
 
     @Test
+    void deveLancarExcecaoAoSalvarMudancaComClienteInexistente() {
+        MudancaDTO dto = criarMudancaDTO();
+        dto.setClienteId(999L);
+        when(clienteRepository.findById(999L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            mudancaService.salvar(dto);
+        });
+        assertEquals("Cliente não encontrado", ex.getMessage());
+    }
+
+    @Test
     void deveAtualizarMudanca_existente() {
         Mudanca existente = criarMudanca();
         when(mudancaRepository.findById(1L)).thenReturn(Optional.of(existente));
@@ -132,6 +144,30 @@ class MudancaServiceTest {
         assertTrue(atualizado.isPresent());
         assertEquals("Rua Nova", atualizado.get().getOrigem());
         assertEquals("Grande", atualizado.get().getCategoria());
+    }
+
+    @Test
+    void deveAtualizarTodosOsCamposMudanca() {
+        Mudanca existente = criarMudanca();
+        when(mudancaRepository.findById(1L)).thenReturn(Optional.of(existente));
+        when(mudancaRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        MudancaDTO novoDTO = criarMudancaDTO();
+        novoDTO.setOrigem("Rua Z");
+        novoDTO.setDestino("Rua Y");
+        novoDTO.setDataHoraMudanca(LocalDateTime.of(2026, 1, 1, 12, 0));
+        novoDTO.setTipoMudanca(TipoMudanca.APARTAMENTO);
+        novoDTO.setCategoria("Média");
+
+        Optional<MudancaDTO> atualizado = mudancaService.atualizar(1L, novoDTO);
+
+        assertTrue(atualizado.isPresent());
+        MudancaDTO dto = atualizado.get();
+        assertEquals("Rua Z", dto.getOrigem());
+        assertEquals("Rua Y", dto.getDestino());
+        assertEquals(LocalDateTime.of(2026, 1, 1, 12, 0), dto.getDataHoraMudanca());
+        assertEquals(TipoMudanca.APARTAMENTO, dto.getTipoMudanca());
+        assertEquals("Média", dto.getCategoria());
     }
 
     @Test
@@ -171,5 +207,76 @@ class MudancaServiceTest {
         assertEquals(1, resultado.size());
         assertEquals("Rua A", resultado.get(0).getOrigem());
         verify(mudancaRepository).findByClienteId(10L);
+    }
+
+    @Test
+    void deveListarMudancasVazio() {
+        when(mudancaRepository.findAll()).thenReturn(List.of());
+        List<MudancaDTO> mudancas = mudancaService.listar();
+        assertTrue(mudancas.isEmpty());
+    }
+
+    @Test
+    void deveListarPorClienteIdVazio() {
+        when(mudancaRepository.findByClienteId(123L)).thenReturn(List.of());
+        List<MudancaDTO> mudancas = mudancaService.listarPorClienteId(123L);
+        assertTrue(mudancas.isEmpty());
+    }
+
+    @Test
+    void toEntity_deveMapearTodosOsCamposCorretamente() {
+        MudancaDTO dto = new MudancaDTO();
+        dto.setOrigem("Rua Teste");
+        dto.setDestino("Avenida Teste");
+        dto.setDataHoraMudanca(LocalDateTime.of(2030, 1, 1, 8, 0));
+        dto.setTipoMudanca(TipoMudanca.APARTAMENTO);
+        dto.setCategoria("Mega");
+        dto.setClienteId(42L);
+
+        Cliente cliente = new Cliente();
+        cliente.setId(42L);
+
+        when(clienteRepository.findById(42L)).thenReturn(Optional.of(cliente));
+
+        MudancaService realService = new MudancaService(mudancaRepository, clienteRepository);
+        Mudanca mudanca = org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+            java.lang.reflect.Method m = MudancaService.class.getDeclaredMethod("toEntity", MudancaDTO.class);
+            m.setAccessible(true);
+            return (Mudanca) m.invoke(realService, dto);
+        });
+
+        assertEquals("Rua Teste", mudanca.getOrigem());
+        assertEquals("Avenida Teste", mudanca.getDestino());
+        assertEquals(LocalDateTime.of(2030, 1, 1, 8, 0), mudanca.getDataHoraMudanca());
+        assertEquals(TipoMudanca.APARTAMENTO, mudanca.getTipoMudanca());
+        assertEquals("Mega", mudanca.getCategoria());
+        assertEquals(42L, mudanca.getCliente().getId());
+    }
+
+    @Test
+    void toDTO_deveMapearTodosOsCamposCorretamente() throws Exception {
+        Mudanca mudanca = new Mudanca();
+        mudanca.setId(99L);
+        mudanca.setOrigem("Rua X");
+        mudanca.setDestino("Rua Y");
+        mudanca.setDataHoraMudanca(LocalDateTime.of(2029, 12, 31, 23, 59));
+        mudanca.setTipoMudanca(TipoMudanca.CASA);
+        mudanca.setCategoria("Especial");
+        Cliente cliente = new Cliente();
+        cliente.setId(77L);
+        mudanca.setCliente(cliente);
+
+        MudancaService realService = new MudancaService(mudancaRepository, clienteRepository);
+        java.lang.reflect.Method m = MudancaService.class.getDeclaredMethod("toDTO", Mudanca.class);
+        m.setAccessible(true);
+        MudancaDTO dto = (MudancaDTO) m.invoke(realService, mudanca);
+
+        assertEquals(99L, dto.getId());
+        assertEquals("Rua X", dto.getOrigem());
+        assertEquals("Rua Y", dto.getDestino());
+        assertEquals(LocalDateTime.of(2029, 12, 31, 23, 59), dto.getDataHoraMudanca());
+        assertEquals(TipoMudanca.CASA, dto.getTipoMudanca());
+        assertEquals("Especial", dto.getCategoria());
+        assertEquals(77L, dto.getClienteId());
     }
 }
