@@ -94,11 +94,15 @@ class ClienteServiceTest {
 
         ClienteDTO novoDTO = criarClienteDTO();
         novoDTO.setNome("Carlos");
+        novoDTO.setEmail("Teste");
+        novoDTO.setSenha("123");
 
         Optional<ClienteDTO> atualizado = clienteService.atualizar(1L, novoDTO);
 
         assertTrue(atualizado.isPresent());
         assertEquals("Carlos", atualizado.get().getNome());
+        assertEquals("Teste", atualizado.get().getEmail());
+        assertEquals("123", atualizado.get().getSenha());
     }
 
     @Test

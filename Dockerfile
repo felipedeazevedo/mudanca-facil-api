@@ -1,14 +1,16 @@
-# Usa imagem Java 21 com suporte a JAR
-FROM eclipse-temurin:21-jdk
+# Etapa de build usando Maven + Java 21
+FROM maven:3.9.4-eclipse-temurin-21 AS build
 
-# Define o diretório da aplicação
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copia o JAR gerado para o container
-COPY target/mudancafacil-*.jar app.jar
+# Etapa de produção com Java 21 slim
+FROM eclipse-temurin:21-jdk-alpine
 
-# Expõe a porta padrão do Spring Boot
+WORKDIR /app
 EXPOSE 8080
 
-# Comando para rodar a aplicação
+COPY --from=build /app/target/*.jar app.jar
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
