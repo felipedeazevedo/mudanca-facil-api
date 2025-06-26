@@ -77,4 +77,11 @@ public class MudancaService {
         m.setCliente(cliente);
         return m;
     }
+
+    public List<MudancaDTO> listarPorClienteId(Long clienteId) {
+        List<Mudanca> mudancas = repository.findByClienteId(clienteId);
+        return mudancas.stream()
+                .map(this::toDTO)
+                .toList();
+    }
 }

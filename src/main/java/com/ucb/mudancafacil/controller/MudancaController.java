@@ -51,4 +51,10 @@ public class MudancaController {
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         return service.deletar(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/cliente/{clienteId}")
+    public ResponseEntity<List<MudancaDTO>> listarPorCliente(@PathVariable Long clienteId) {
+        List<MudancaDTO> mudancas = service.listarPorClienteId(clienteId);
+        return ResponseEntity.ok(mudancas);
+    }
 }

@@ -1,7 +1,6 @@
 package com.ucb.mudancafacil.service;
 
 import com.ucb.mudancafacil.dto.EmpresaDTO;
-import com.ucb.mudancafacil.enums.PorteEmpresa;
 import com.ucb.mudancafacil.model.Empresa;
 import com.ucb.mudancafacil.repository.EmpresaRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +39,6 @@ class EmpresaServiceTest {
         e.setNome("TransMudança");
         e.setEmail("contato@transmudanca.com");
         e.setSenha("segura123");
-        e.setPorte(PorteEmpresa.MEDIA);
         e.setHorarioInicioDisponibilidade(LocalTime.of(8, 0));
         e.setHorarioFimDisponibilidade(LocalTime.of(18, 0));
         e.setRaAtuacao("DF");
@@ -56,7 +54,6 @@ class EmpresaServiceTest {
         dto.setNome("TransMudança");
         dto.setEmail("contato@transmudanca.com");
         dto.setSenha("segura123");
-        dto.setPorte(PorteEmpresa.MEDIA);
         dto.setHorarioInicioDisponibilidade(LocalTime.of(8, 0));
         dto.setHorarioFimDisponibilidade(LocalTime.of(18, 0));
         dto.setRaAtuacao("DF");

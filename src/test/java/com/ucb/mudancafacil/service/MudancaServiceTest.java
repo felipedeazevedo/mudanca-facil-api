@@ -2,7 +2,9 @@ package com.ucb.mudancafacil.service;
 
 import com.ucb.mudancafacil.dto.MudancaDTO;
 import com.ucb.mudancafacil.enums.TipoMudanca;
+import com.ucb.mudancafacil.model.Cliente;
 import com.ucb.mudancafacil.model.Mudanca;
+import com.ucb.mudancafacil.repository.ClienteRepository;
 import com.ucb.mudancafacil.repository.MudancaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,9 @@ class MudancaServiceTest {
     @Mock
     private MudancaRepository mudancaRepository;
 
+    @Mock
+    private ClienteRepository clienteRepository;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -42,6 +47,12 @@ class MudancaServiceTest {
         m.setDataHoraMudanca(LocalDateTime.of(2025, 7, 1, 10, 0));
         m.setTipoMudanca(TipoMudanca.CASA);
         m.setCategoria("Pequena");
+
+        Cliente cliente = new Cliente();
+        cliente.setId(10L);
+
+        m.setCliente(cliente);
+
         return m;
     }
 
@@ -53,6 +64,7 @@ class MudancaServiceTest {
         dto.setDataHoraMudanca(LocalDateTime.of(2025, 7, 1, 10, 0));
         dto.setTipoMudanca(TipoMudanca.CASA);
         dto.setCategoria("Pequena");
+        dto.setClienteId(10L);
         return dto;
     }
 
@@ -89,9 +101,17 @@ class MudancaServiceTest {
     @Test
     void deveSalvarMudanca() {
         Mudanca mudanca = criarMudanca();
+        Cliente cliente = new Cliente();
+        cliente.setId(1L);
+
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
+
         when(mudancaRepository.save(any())).thenReturn(mudanca);
 
-        MudancaDTO dtoSalvo = mudancaService.salvar(criarMudancaDTO());
+        MudancaDTO dto = criarMudancaDTO();
+        dto.setClienteId(1L);
+
+        MudancaDTO dtoSalvo = mudancaService.salvar(dto);
 
         assertEquals("Rua A", dtoSalvo.getOrigem());
         verify(mudancaRepository).save(any());
@@ -140,5 +160,16 @@ class MudancaServiceTest {
         boolean resultado = mudancaService.deletar(123L);
 
         assertFalse(resultado);
+    }
+
+    @Test
+    void deveListarMudancasPorClienteId() {
+        when(mudancaRepository.findByClienteId(10L)).thenReturn(List.of(criarMudanca()));
+
+        List<MudancaDTO> resultado = mudancaService.listarPorClienteId(10L);
+
+        assertEquals(1, resultado.size());
+        assertEquals("Rua A", resultado.get(0).getOrigem());
+        verify(mudancaRepository).findByClienteId(10L);
     }
 }

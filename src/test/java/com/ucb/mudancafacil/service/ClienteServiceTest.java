@@ -80,9 +80,15 @@ class ClienteServiceTest {
         Cliente cliente = criarCliente();
         when(clienteRepository.save(any())).thenReturn(cliente);
 
-        ClienteDTO dto = clienteService.salvar(criarClienteDTO());
+        ClienteDTO dto = criarClienteDTO();
 
-        assertEquals("João", dto.getNome());
+        ClienteDTO dtoSalvo = clienteService.salvar(dto);
+
+        assertEquals("João", dtoSalvo.getNome());
+        assertEquals("joao@email.com", dtoSalvo.getEmail());
+        assertEquals("123", dtoSalvo.getSenha());
+        assertEquals(1L, dtoSalvo.getId());
+
         verify(clienteRepository).save(any());
     }
 
@@ -92,17 +98,19 @@ class ClienteServiceTest {
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(existente));
         when(clienteRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        ClienteDTO novoDTO = criarClienteDTO();
+        ClienteDTO novoDTO = new ClienteDTO();
+        novoDTO.setId(1L);
         novoDTO.setNome("Carlos");
-        novoDTO.setEmail("Teste");
-        novoDTO.setSenha("123");
+        novoDTO.setEmail("teste@email.com");
+        novoDTO.setSenha("novaSenha");
 
         Optional<ClienteDTO> atualizado = clienteService.atualizar(1L, novoDTO);
 
         assertTrue(atualizado.isPresent());
         assertEquals("Carlos", atualizado.get().getNome());
-        assertEquals("Teste", atualizado.get().getEmail());
-        assertEquals("123", atualizado.get().getSenha());
+        assertEquals("teste@email.com", atualizado.get().getEmail());
+        assertEquals("novaSenha", atualizado.get().getSenha());
+        assertEquals(1L, atualizado.get().getId());
     }
 
     @Test

@@ -34,7 +34,6 @@ public class EmpresaService {
             existing.setNome(dto.getNome());
             existing.setEmail(dto.getEmail());
             existing.setSenha(dto.getSenha());
-            existing.setPorte(dto.getPorte());
             existing.setHorarioInicioDisponibilidade(dto.getHorarioInicioDisponibilidade());
             existing.setHorarioFimDisponibilidade(dto.getHorarioFimDisponibilidade());
             existing.setRaAtuacao(dto.getRaAtuacao());
@@ -59,7 +58,6 @@ public class EmpresaService {
         dto.setNome(empresa.getNome());
         dto.setEmail(empresa.getEmail());
         dto.setSenha(empresa.getSenha());
-        dto.setPorte(empresa.getPorte());
         dto.setHorarioInicioDisponibilidade(empresa.getHorarioInicioDisponibilidade());
         dto.setHorarioFimDisponibilidade(empresa.getHorarioFimDisponibilidade());
         dto.setRaAtuacao(empresa.getRaAtuacao());
@@ -74,7 +72,6 @@ public class EmpresaService {
         empresa.setNome(dto.getNome());
         empresa.setEmail(dto.getEmail());
         empresa.setSenha(dto.getSenha());
-        empresa.setPorte(dto.getPorte());
         empresa.setHorarioInicioDisponibilidade(dto.getHorarioInicioDisponibilidade());
         empresa.setHorarioFimDisponibilidade(dto.getHorarioFimDisponibilidade());
         empresa.setRaAtuacao(dto.getRaAtuacao());
