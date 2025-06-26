@@ -57,7 +57,6 @@ public class ClienteService {
 
     private Cliente toEntity(ClienteDTO dto) {
         Cliente cliente = new Cliente();
-        cliente.setId(dto.getId());
         cliente.setNome(dto.getNome());
         cliente.setEmail(dto.getEmail());
         cliente.setSenha(dto.getSenha());

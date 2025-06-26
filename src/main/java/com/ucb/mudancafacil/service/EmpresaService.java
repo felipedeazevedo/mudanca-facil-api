@@ -71,7 +71,6 @@ public class EmpresaService {
 
     private Empresa toEntity(EmpresaDTO dto) {
         Empresa empresa = new Empresa();
-        empresa.setId(dto.getId());
         empresa.setNome(dto.getNome());
         empresa.setEmail(dto.getEmail());
         empresa.setSenha(dto.getSenha());

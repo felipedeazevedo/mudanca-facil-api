@@ -1,7 +1,9 @@
 package com.ucb.mudancafacil.service;
 
 import com.ucb.mudancafacil.dto.MudancaDTO;
+import com.ucb.mudancafacil.model.Cliente;
 import com.ucb.mudancafacil.model.Mudanca;
+import com.ucb.mudancafacil.repository.ClienteRepository;
 import com.ucb.mudancafacil.repository.MudancaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 public class MudancaService {
 
     private final MudancaRepository repository;
+    private final ClienteRepository clienteRepository;
 
     public List<MudancaDTO> listar() {
         return repository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
@@ -25,6 +28,7 @@ public class MudancaService {
     }
 
     public MudancaDTO salvar(MudancaDTO dto) {
+
         Mudanca mudanca = toEntity(dto);
         return toDTO(repository.save(mudanca));
     }
@@ -56,18 +60,21 @@ public class MudancaService {
         dto.setDataHoraMudanca(m.getDataHoraMudanca());
         dto.setTipoMudanca(m.getTipoMudanca());
         dto.setCategoria(m.getCategoria());
+        dto.setClienteId(m.getCliente().getId());
         return dto;
     }
 
     private Mudanca toEntity(MudancaDTO dto) {
+        Cliente cliente = clienteRepository.findById(dto.getClienteId())
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+
         Mudanca m = new Mudanca();
-        m.setId(dto.getId()); // pode ser null no caso de POST
-        m.setId(dto.getId());
         m.setOrigem(dto.getOrigem());
         m.setDestino(dto.getDestino());
         m.setDataHoraMudanca(dto.getDataHoraMudanca());
         m.setTipoMudanca(dto.getTipoMudanca());
         m.setCategoria(dto.getCategoria());
+        m.setCliente(cliente);
         return m;
     }
 }

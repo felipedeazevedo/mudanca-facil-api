@@ -15,4 +15,5 @@ public class MudancaDTO {
     private LocalDateTime dataHoraMudanca;
     private TipoMudanca tipoMudanca;
     private String categoria;
+    private Long clienteId;
 }
