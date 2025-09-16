@@ -1,39 +1,67 @@
-Necessário instalar:
+🚀 Projeto Mudança Fácil — API
+
+📦 Pré-requisitos
+
+Antes de iniciar, certifique-se de ter instalado em sua máquina:
 
 JDK 21
+
 Maven 3.9.4
+
 Docker Desktop
 
-Para baixar as dependências do projeto, execute
+⚙️ Configuração do projeto
+
+Para baixar as dependências e compilar o projeto:
 
 mvn clean install
 
-Swagger (Documentação da API com todos os endpoints e body's das requisições): 
+📖 Documentação da API
 
-http://localhost:8080/swagger-ui/index.html
+A documentação está disponível via Swagger, incluindo todos os endpoints e exemplos de requisição/resposta:
 
-Neste projeto, temos testes unitário e testes de mutação.
+👉 http://localhost:8080/swagger-ui/index.html
 
-Testes Unitários:
-São testes que verificam o comportamento isolado de uma classe ou método, sem depender de componentes externos como banco de dados, APIs ou outras classes.
+✅ Testes
 
-Tecnologias:
+O projeto inclui testes unitários e testes de mutação para garantir a qualidade do código.
 
-JUnit: biblioteca principal para criar testes em Java.
+🔹 Testes Unitários
 
-Mockito: usado para simular (mockar) comportamentos de dependências.
+Validam o comportamento isolado de classes e métodos.
 
-AssertJ: ajudam a escrever asserções mais legíveis.
+Não dependem de banco de dados, APIs externas ou outros módulos.
 
-Testes de Mutação:
-São testes que verificam a qualidade dos testes unitários. O mecanismo:
+Tecnologias utilizadas:
 
-Modifica levemente o código (ex: troca == por !=, remove if, etc.)
+JUnit → biblioteca principal para criação de testes em Java.
 
-Roda os testes para ver se detectam o erro (mutação).
+Mockito → simulação de dependências (mocks).
 
-Se o teste não falha, o mutante “sobreviveu” — e o teste é considerado fraco.
+AssertJ → escrita de asserções mais fluídas e legíveis.
 
-Tecnologia:
+🔹 Testes de Mutação
 
-PITEST: ferramenta de teste de mutação mais usada no ecossistema Java.
+Avaliam a qualidade dos testes unitários.
+
+Funcionam modificando o código (ex.: trocar == por !=, remover if, etc.).
+
+Se os testes não falharem, o mutante sobrevive → sinal de teste fraco.
+
+Tecnologia utilizada:
+
+PITEST → ferramenta mais popular de mutação no ecossistema Java.
+
+🛠️ Tecnologias do projeto
+
+Java 21
+
+Spring Boot (se for o caso, você pode adicionar aqui)
+
+Maven
+
+JUnit / Mockito / AssertJ
+
+PITEST
+
+Docker

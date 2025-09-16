@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/mudanca_facil}
+    username: ${DATABASE_USERNAME:user}
+    password: ${DATABASE_PASSWORD:senha123}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+security:
+  jwt:
+    secret-base64: V0d4b3JrU2VlZFRoaXNJc0p1c3RBbi1FeGFtcGxlLXNlY3JldC0yNTZiaXRzIQ==
+    expiration-seconds: 3600
+
+server:
+  port: 8080
