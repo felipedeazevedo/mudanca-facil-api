@@ -1,13 +1,18 @@
 package com.ucb.mudancafacil.controller;
 
-import com.ucb.mudancafacil.dto.EmpresaCreateDTO;
-import com.ucb.mudancafacil.dto.EmpresaListDTO;
-import com.ucb.mudancafacil.dto.EmpresaUpdateDTO;
+import com.ucb.mudancafacil.dto.empresa.EmpresaCreateDTO;
+import com.ucb.mudancafacil.dto.empresa.EmpresaListDTO;
+import com.ucb.mudancafacil.dto.empresa.EmpresaUpdateDTO;
 import com.ucb.mudancafacil.service.EmpresaService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,9 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -30,41 +35,45 @@ public class EmpresaController {
     private final EmpresaService service;
 
     @GetMapping
-    public List<EmpresaListDTO> listar() {
-        return service.listar();
+    public ResponseEntity<Page<EmpresaListDTO>> listar(
+            @PageableDefault(size = 20, sort = "razaoSocial") Pageable pageable) {
+        return ResponseEntity.ok(service.listar(pageable));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:[0-9a-fA-F\\-]{36}}")
     public ResponseEntity<EmpresaListDTO> buscarPorId(@PathVariable UUID id) {
-        EmpresaListDTO dto = service.buscarPorId(id);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
 
     @PostMapping
     public ResponseEntity<EmpresaListDTO> criar(@Valid @RequestBody EmpresaCreateDTO dto) {
         EmpresaListDTO criada = service.criar(dto);
-        return ResponseEntity
-                .created(URI.create("/empresas/" + criada.getId()))
-                .body(criada);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .path("/{id}")
+                .buildAndExpand(criada.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(criada);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id:[0-9a-fA-F\\-]{36}}")
     public ResponseEntity<EmpresaListDTO> atualizar(
             @PathVariable UUID id,
             @Valid @RequestBody EmpresaUpdateDTO dto) {
-        EmpresaListDTO updated = service.patch(id, dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(service.patch(id, dto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletar(@PathVariable UUID id) {
+    @DeleteMapping("/{id:[0-9a-fA-F\\-]{36}}")
+    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         service.deletar(id);
-        return ResponseEntity.ok("Empresa " + id + " excluída com sucesso.");
+        return ResponseEntity.noContent().build(); // 204
     }
 
     @GetMapping("/me")
-    public EmpresaListDTO me(@AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {// ID da empresa
+    public ResponseEntity<EmpresaListDTO> me(@AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null) return ResponseEntity.status(401).build();
         String email = jwt.getClaim("email");
-        return service.buscarPorEmail(email);
+        if (email == null || email.isBlank()) return ResponseEntity.status(401).build();
+        return ResponseEntity.ok(service.buscarPorEmail(email));
     }
 }

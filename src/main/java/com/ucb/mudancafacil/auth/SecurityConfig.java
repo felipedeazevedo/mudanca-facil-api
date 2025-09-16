@@ -1,6 +1,6 @@
 package com.ucb.mudancafacil.auth;
 
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,32 +19,61 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,
-                                           JwtAuthenticationConverter jwtAuthConverter) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            JwtAuthenticationConverter jwtAuthConverter
+    ) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
+                        .requestMatchers("/error").permitAll()
+
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/empresas").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/clientes").permitAll()
+                        .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                        .requestMatchers("/empresas/me").hasRole("EMPRESA")
+                        .requestMatchers("/empresas/**").hasRole("EMPRESA")
+                        .requestMatchers("/clientes/me").hasRole("CLIENTE")
+                        .requestMatchers("/clientes/**").hasRole("CLIENTE")
+
                         .anyRequest().authenticated()
                 )
-                // sem httpBasic, já que vamos só de Bearer JWT
                 .httpBasic(AbstractHttpConfigurer::disable)
+                // usando JWT, mantém; se não, remover este bloco
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        // .bearerTokenResolver(bearerTokenResolver)
                         .jwt(j -> j.jwtAuthenticationConverter(jwtAuthConverter))
-                ).exceptionHandling(e -> e
-                .authenticationEntryPoint((req, res, ex) -> res.setStatus(HttpServletResponse.SC_UNAUTHORIZED)) // 401 só p/ falta de auth
-                .accessDeniedHandler((req, res, ex) -> res.setStatus(HttpServletResponse.SC_FORBIDDEN))          // 403 p/ sem permissão
-        );
+                );
 
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // ajuste o strength se quiser (ex.: 12)
+        return new BCryptPasswordEncoder();
     }
+
+//    @Bean
+//    BearerTokenResolver bearerTokenResolver() {
+//        DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
+//        return request -> {
+//            String ctx = request.getContextPath(); // considera context-path (/api, etc.)
+//            String uri = request.getRequestURI();
+//
+//            boolean isPublicPost =
+//                    ("POST".equals(request.getMethod()) &&
+//                            ( (ctx + "/empresas").equals(uri) ||
+//                                    (ctx + "/clientes").equals(uri) ));   // 👈 inclua aqui outras públicas
+//
+//            if (isPublicPost) {
+//                return null; // ignora bearer neste endpoint
+//            }
+//            return delegate.resolve(request);
+//        };
+//    }
 }

@@ -1,17 +1,15 @@
 package com.ucb.mudancafacil.model;
 
-import com.ucb.mudancafacil.enums.StatusEmpresa;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -30,13 +28,13 @@ import java.util.UUID;
 @EqualsAndHashCode(of = "id")
 @Entity
 @Table(
-        name = "empresa",
+        name = "cliente",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uq_empresa_cnpj", columnNames = "cnpj"),
-                @UniqueConstraint(name = "uq_empresa_email", columnNames = "email")
+                @UniqueConstraint(name = "uq_cliente_cpf", columnNames = "cpf"),
+                @UniqueConstraint(name = "uq_cliente_email", columnNames = "email")
         }
 )
-public class Empresa {
+public class Cliente {
 
     @Id
     @GeneratedValue
@@ -44,19 +42,14 @@ public class Empresa {
     private UUID id;
 
     @NotBlank
-    @Pattern(regexp = "\\d{14}", message = "CNPJ deve conter exatamente 14 dígitos")
-    @Column(name = "cnpj", length = 14, nullable = false)
-    private String cnpj;
-
-    @NotBlank
-    @Size(max = 255)
-    @Column(name = "razao_social", length = 255, nullable = false)
-    private String razaoSocial;
+    @Pattern(regexp = "\\d{11}", message = "CPF deve conter exatamente 11 dígitos")
+    @Column(name = "cpf", length = 11, nullable = false)
+    private String cpf;
 
     @NotBlank
     @Size(max = 150)
-    @Column(name = "nome_responsavel", length = 150, nullable = false)
-    private String nomeResponsavel;
+    @Column(name = "nome", length = 150, nullable = false)
+    private String nome;
 
     @NotBlank
     @Email
@@ -74,14 +67,13 @@ public class Empresa {
     @Column(name = "telefone", length = 20, nullable = false)
     private String telefone;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private StatusEmpresa status;
-
     @Column(name = "data_criacao", nullable = false, updatable = false)
     private OffsetDateTime dataCriacao;
 
     @Column(name = "data_atualizacao")
     private OffsetDateTime dataAtualizacao;
+
+    @Valid
+    @Embedded
+    private EnderecoCliente endereco;
 }

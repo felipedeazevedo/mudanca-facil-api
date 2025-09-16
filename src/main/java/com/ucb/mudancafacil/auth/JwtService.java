@@ -28,7 +28,7 @@ public class JwtService {
         this.expirationSeconds = expirationSeconds;
     }
 
-    public String generateToken(UUID empresaId, String email, List<String> roles) {
+    public String generateToken(UUID id, String email, List<String> roles) {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(expirationSeconds);
 
@@ -36,7 +36,7 @@ public class JwtService {
                 .setIssuer("mudanca-facil")
                 .setAudience("api")
                 .setId(UUID.randomUUID().toString())
-                .setSubject(empresaId.toString())      // sub = ID
+                .setSubject(id.toString())      // sub = ID
                 .claim("email", email)                 // email como claim
                 .claim("roles", roles)                 // lista de roles
                 .setIssuedAt(Date.from(now))

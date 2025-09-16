@@ -1,4 +1,4 @@
-package com.ucb.mudancafacil.dto;
+package com.ucb.mudancafacil.dto.empresa;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
@@ -6,11 +6,11 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EmpresaUpdateDTO {
 
-    // Se permitir trocar a razão social
     @Size(max = 255)
     private String razaoSocial;
 

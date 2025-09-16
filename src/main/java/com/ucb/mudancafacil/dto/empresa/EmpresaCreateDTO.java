@@ -1,4 +1,4 @@
-package com.ucb.mudancafacil.dto;
+package com.ucb.mudancafacil.dto.empresa;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

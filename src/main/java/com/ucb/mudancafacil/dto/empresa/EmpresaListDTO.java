@@ -1,11 +1,12 @@
-package com.ucb.mudancafacil.dto;
+package com.ucb.mudancafacil.dto.empresa;
 
 import lombok.Getter;
 import lombok.Setter;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-@Getter @Setter
+@Getter
+@Setter
 public class EmpresaListDTO {
     private UUID id;
     private String cnpjMascarado;

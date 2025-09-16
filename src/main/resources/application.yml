@@ -8,7 +8,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -18,6 +18,13 @@ security:
   jwt:
     secret-base64: V0d4b3JrU2VlZFRoaXNJc0p1c3RBbi1FeGFtcGxlLXNlY3JldC0yNTZiaXRzIQ==
     expiration-seconds: 3600
+
+logging:
+  level:
+    org:
+      springdoc: DEBUG
+      springframework:
+        web: DEBUG
 
 server:
   port: 8080
