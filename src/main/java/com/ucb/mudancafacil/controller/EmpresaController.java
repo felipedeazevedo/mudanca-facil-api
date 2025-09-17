@@ -4,7 +4,6 @@ import com.ucb.mudancafacil.dto.empresa.EmpresaCreateDTO;
 import com.ucb.mudancafacil.dto.empresa.EmpresaListDTO;
 import com.ucb.mudancafacil.dto.empresa.EmpresaUpdateDTO;
 import com.ucb.mudancafacil.service.EmpresaService;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -71,9 +70,17 @@ public class EmpresaController {
 
     @GetMapping("/me")
     public ResponseEntity<EmpresaListDTO> me(@AuthenticationPrincipal Jwt jwt) {
-        if (jwt == null) return ResponseEntity.status(401).build();
-        String email = jwt.getClaim("email");
-        if (email == null || email.isBlank()) return ResponseEntity.status(401).build();
-        return ResponseEntity.ok(service.buscarPorEmail(email));
+        if (jwt == null)
+            return ResponseEntity.status(401).build();
+
+        String sub = jwt.getSubject();
+        UUID id = null;
+        if (sub != null) {
+            try {
+                id = UUID.fromString(sub);
+            } catch (IllegalArgumentException ignored) { /* não era UUID */ }
+        }
+
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
 }

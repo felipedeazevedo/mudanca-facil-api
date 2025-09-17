@@ -37,15 +37,14 @@ public class EmpresaService {
 
     private final EmpresaRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final ValidationService validationService;
 
     @Transactional
     public EmpresaListDTO criar(EmpresaCreateDTO dto) {
         if (repository.existsByCnpj(dto.getCnpj())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "CNPJ já cadastrado.");
         }
-        if (repository.existsByEmail(dto.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado.");
-        }
+        validationService.validateEmailUniqueness(dto.getEmail());
 
         Empresa entity = new Empresa();
         entity.setCnpj(dto.getCnpj());
@@ -72,9 +71,7 @@ public class EmpresaService {
                 .orElseThrow(() -> new EntityNotFoundException(EMPRESA_NOT_FOUND));
 
         if (dto.getEmail() != null && !dto.getEmail().equalsIgnoreCase(entity.getEmail())) {
-            if (repository.existsByEmail(dto.getEmail())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado.");
-            }
+            validationService.validateEmailUniqueness(dto.getEmail());
             entity.setEmail(dto.getEmail());
         }
         if (dto.getRazaoSocial() != null && !dto.getRazaoSocial().isBlank()) {
@@ -119,16 +116,6 @@ public class EmpresaService {
     public Page<EmpresaListDTO> listar(Pageable pageable) {
         Pageable safePagination = sanitize(pageable);
         return repository.findAll(safePagination).map(this::toListDTO);
-    }
-
-    @Transactional(Transactional.TxType.SUPPORTS)
-    public EmpresaListDTO buscarPorEmail(String email) {
-        if (email == null || email.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token sem e-mail.");
-        }
-        Empresa entity = repository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Empresa não encontrada para o token"));
-        return toListDTO(entity);
     }
 
     private Pageable sanitize(Pageable pageable) {

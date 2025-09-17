@@ -26,6 +26,7 @@ public class ClienteService {
     private static final String CLIENTE_NOT_FOUND = "Cliente não encontrado.";
 
     private final ClienteRepository repository;
+    private final ValidationService validationService;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -36,9 +37,7 @@ public class ClienteService {
         if (repository.existsByCpf(cpf)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "CPF já cadastrado.");
         }
-        if (repository.existsByEmail(email)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado.");
-        }
+        validationService.validateEmailUniqueness(dto.getEmail());
 
         Cliente entity = new Cliente();
         entity.setCpf(cpf);
@@ -77,9 +76,7 @@ public class ClienteService {
         if (dto.getEmail() != null) {
             String newEmail = safeLower(dto.getEmail());
             if (!newEmail.equalsIgnoreCase(entity.getEmail())) {
-                if (repository.existsByEmail(newEmail)) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado.");
-                }
+                validationService.validateEmailUniqueness(newEmail);
                 entity.setEmail(newEmail);
             }
         }
@@ -123,17 +120,6 @@ public class ClienteService {
     public ClienteListDTO buscarPorId(UUID id) {
         Cliente entity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(CLIENTE_NOT_FOUND));
-        return toListDTO(entity);
-    }
-
-    @Transactional(Transactional.TxType.SUPPORTS)
-    public ClienteListDTO buscarPorEmail(String emailRaw) {
-        String email = safeLower(emailRaw);
-        if (email == null || email.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token sem e-mail.");
-        }
-        Cliente entity = repository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado para o token"));
         return toListDTO(entity);
     }
 

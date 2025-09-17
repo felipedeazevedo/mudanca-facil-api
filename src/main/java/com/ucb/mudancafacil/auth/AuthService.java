@@ -34,29 +34,29 @@ public class AuthService {
         var empresaOpt = empresaRepository.findByEmail(email);
         var clienteOpt = clienteRepository.findByEmail(email);
 
-        // Sempre roda as duas comparações para mitigar enumeração por timing:
-        boolean empresaPwdOk = passwordEncoder.matches(
-                rawPwd,
-                empresaOpt.map(Empresa::getSenhaHash).orElse(DUMMY_BCRYPT)
-        );
-        boolean clientePwdOk = passwordEncoder.matches(
-                rawPwd,
-                clienteOpt.map(Cliente::getSenhaHash).orElse(DUMMY_BCRYPT)
-        );
-
-        if (empresaOpt.isPresent() && empresaPwdOk) {
-            var emp = empresaOpt.get();
-            String token = jwtService.generateToken(emp.getId(), emp.getEmail(), List.of("EMPRESA"));
-            return new LoginResponse(token, "Bearer", jwtService.getExpirationSeconds());
+        if (empresaOpt.isPresent()) {
+            boolean empresaPwdOk = passwordEncoder.matches(
+                    rawPwd,
+                    empresaOpt.map(Empresa::getSenhaHash).orElse(DUMMY_BCRYPT)
+            );
+            if (empresaPwdOk) {
+                var emp = empresaOpt.get();
+                String token = jwtService.generateToken(emp.getId(), emp.getEmail(), List.of("EMPRESA"));
+                return new LoginResponse(token, "Bearer", jwtService.getExpirationSeconds());
+            }
         }
-        if (clienteOpt.isPresent() && clientePwdOk) {
-            var cli = clienteOpt.get();
-            String token = jwtService.generateToken(cli.getId(), cli.getEmail(), List.of("CLIENTE"));
-            return new LoginResponse(token, "Bearer", jwtService.getExpirationSeconds());
+        if (clienteOpt.isPresent()) {
+            boolean clientePwdOk = passwordEncoder.matches(
+                    rawPwd,
+                    clienteOpt.map(Cliente::getSenhaHash).orElse(DUMMY_BCRYPT)
+            );
+            if (clientePwdOk) {
+                var cli = clienteOpt.get();
+                String token = jwtService.generateToken(cli.getId(), cli.getEmail(), List.of("CLIENTE"));
+                return new LoginResponse(token, "Bearer", jwtService.getExpirationSeconds());
+            }
         }
 
-        // Se o e-mail existir nos dois e NENHUM casar a senha, ainda devolvemos 401.
-        // (Se quiser tratar “e-mail duplicado entre domínios” como 409, dá pra detectar aqui.)
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciais inválidas.");
     }
 

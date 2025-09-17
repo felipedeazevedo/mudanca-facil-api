@@ -4,7 +4,6 @@ import com.ucb.mudancafacil.dto.cliente.ClienteCreateDTO;
 import com.ucb.mudancafacil.dto.cliente.ClienteListDTO;
 import com.ucb.mudancafacil.dto.cliente.ClienteUpdateDTO;
 import com.ucb.mudancafacil.service.ClienteService;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -72,22 +71,18 @@ public class ClienteController {
 
     @GetMapping("/me")
     public ResponseEntity<ClienteListDTO> me(@AuthenticationPrincipal Jwt jwt) {
-        if (jwt == null) return ResponseEntity.status(401).build();
+        if (jwt == null)
+            return ResponseEntity.status(401).build();
 
-        // 1) tentar pelo sub como UUID
         String sub = jwt.getSubject();
+        UUID id = null;
         if (sub != null) {
             try {
-                UUID id = UUID.fromString(sub);
-                return ResponseEntity.ok(service.buscarPorId(id));
+                id = UUID.fromString(sub);
             } catch (IllegalArgumentException ignored) { /* não era UUID */ }
         }
 
-        // 2) fallback pelo email (se o token tiver)
-        String email = jwt.getClaim("email");
-        if (email == null || email.isBlank()) return ResponseEntity.status(401).build();
-
-        return ResponseEntity.ok(service.buscarPorEmail(email));
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
 
     private boolean isSelf(Jwt jwt, UUID resourceId) {
